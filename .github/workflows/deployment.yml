@@ -1,32 +1,38 @@
 name: Caller Workflow
- 
+
 on:
   push:
     branches:
       - main
- 
+
 jobs:
   decide:
     runs-on: ubuntu-latest
+    outputs:
+      workflow_path: ${{ steps.set_path.outputs.workflow_path }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
- 
+
       - name: Get Commit Message
         id: get_message
         run: |
           COMMIT_MESSAGE=$(git log -1 --pretty=%B)
           echo "Commit message: $COMMIT_MESSAGE"
           if [[ "$COMMIT_MESSAGE" == *"deploy:1"* ]]; then
-            echo "workflow_path=deploy.yml" >> $GITHUB_ENV
+            echo "::set-output name=workflow_path::deploy.yml"
           elif [[ "$COMMIT_MESSAGE" == *"deploy:2"* ]]; then
-            echo "workflow_path=deployEKS.yml" >> $GITHUB_ENV
+            echo "::set-output name=workflow_path::deployEKS.yml"
           else
-            echo "No valid deployment instruction in the commit message. ."
+            echo "No valid deployment instruction in the commit message."
             exit 1
- 
-  call_workflow:
+
+  call_deploy:
     needs: decide
-    uses: ./${{ env.workflow_path }}
-    with:
-      user_input: ${{ env.workflow_path }}
+    if: ${{ needs.decide.outputs.workflow_path == 'deploy.yml' }}
+    uses: ./.github/workflows/deploy.yml
+
+  call_deploy_eks:
+    needs: decide
+    if: ${{ needs.decide.outputs.workflow_path == 'deployEKS.yml' }}
+    uses: ./.github/workflows/deployEKS.yml
