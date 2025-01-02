@@ -18,9 +18,9 @@ jobs:
           COMMIT_MESSAGE=$(git log -1 --pretty=%B)
           echo "Commit message: $COMMIT_MESSAGE"
           if [[ "$COMMIT_MESSAGE" == *"deploy:1"* ]]; then
-            echo "workflow_path=reusable1.yml" >> $GITHUB_ENV
+            echo "workflow_path=deploy.yml" >> $GITHUB_ENV
           elif [[ "$COMMIT_MESSAGE" == *"deploy:2"* ]]; then
-            echo "workflow_path=reusable2.yml" >> $GITHUB_ENV
+            echo "workflow_path=deployEKS.yml" >> $GITHUB_ENV
           else
             echo "No valid deployment instruction in the commit message."
             exit 1
