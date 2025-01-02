@@ -1,0 +1,32 @@
+name: Caller Workflow
+ 
+on:
+  push:
+    branches:
+      - main
+ 
+jobs:
+  decide:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+ 
+      - name: Get Commit Message
+        id: get_message
+        run: |
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+          echo "Commit message: $COMMIT_MESSAGE"
+          if [[ "$COMMIT_MESSAGE" == *"deploy:1"* ]]; then
+            echo "workflow_path=reusable1.yml" >> $GITHUB_ENV
+          elif [[ "$COMMIT_MESSAGE" == *"deploy:2"* ]]; then
+            echo "workflow_path=reusable2.yml" >> $GITHUB_ENV
+          else
+            echo "No valid deployment instruction in the commit message."
+            exit 1
+ 
+  call_workflow:
+    needs: decide
+    uses: ./${{ env.workflow_path }}
+    with:
+      user_input: ${{ env.workflow_path }}
