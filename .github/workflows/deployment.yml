@@ -22,7 +22,7 @@ jobs:
           elif [[ "$COMMIT_MESSAGE" == *"deploy:2"* ]]; then
             echo "workflow_path=deployEKS.yml" >> $GITHUB_ENV
           else
-            echo "No valid deployment instruction in the commit message."
+            echo "No valid deployment instruction in the commit message. ."
             exit 1
  
   call_workflow:
